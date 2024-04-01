@@ -91,7 +91,7 @@
 		"node": ">=16.0.0"
 	},
 	"dependencies": {
-		"@maca134/hono-passport": "^1.0.6",
+		"@maca134/hono-passport": "^1.0.7",
 		"hono": "^4.1.7",
 		"openid": "^2.0.12"
 	}
