@@ -65,7 +65,7 @@
 	],
 	"devDependencies": {
 		"@hono/node-server": "^1.9.1",
-		"@types/eslint": "^8.56.6",
+		"@types/eslint": "^8.56.7",
 		"@types/node": "^20.12.2",
 		"@types/openid": "^2.0.5",
 		"@typescript-eslint/eslint-plugin": "^7.4.0",
@@ -91,7 +91,7 @@
 		"node": ">=16.0.0"
 	},
 	"dependencies": {
-		"@maca134/hono-passport": "^1.0.5",
+		"@maca134/hono-passport": "^1.0.6",
 		"hono": "^4.1.7",
 		"openid": "^2.0.12"
 	}
