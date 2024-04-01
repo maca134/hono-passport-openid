@@ -1,38 +1,44 @@
 import { promisify } from 'util';
+import { PassportError, type Awaitable, type HonoPassportStrategy } from '@maca134/hono-passport';
 import type { Context } from 'hono';
 import openid from 'openid';
-import { PassportError, type Awaitable, type HonoPassportStrategy } from '@maca134/hono-passport';
 
 const { RelyingParty } = openid;
 
 export type OpenIDStrategyOptions = {
-	providerURL?: string,
-	returnURL: string,
-	realm: string,
-	stateless?: boolean,
-	strict?: boolean,
-	identifierField?: string,
+	providerURL?: string;
+	returnURL: string;
+	realm: string;
+	stateless?: boolean;
+	strict?: boolean;
+	identifierField?: string;
 };
 
-async function getIdentifier(ctx: Context, identifierField: string, options: OpenIDStrategyOptions) {
+async function getIdentifier(
+	ctx: Context,
+	identifierField: string,
+	options: OpenIDStrategyOptions
+) {
 	let identifier = ctx.req.query(identifierField);
 
 	if (!identifier && ctx.req.method === 'POST') {
 		const contentType = ctx.req.header('Content-Type');
 		switch (contentType) {
 			case 'application/x-www-form-urlencoded':
-			case 'multipart/form-data':
+			case 'multipart/form-data': {
 				const body = await ctx.req.parseBody();
 				if (body && body[identifierField] && typeof body[identifierField] === 'string') {
 					identifier = body[identifierField] as string;
 				}
 				break;
-			case 'application/json':
+			}
+			case 'application/json': {
 				const json = await ctx.req.json();
 				if (json && json[identifierField] && typeof json[identifierField] === 'string') {
 					identifier = json[identifierField] as string;
 				}
 				break;
+			}
 			default:
 				break;
 		}
@@ -54,18 +60,15 @@ function isOpenIDError(e: unknown): e is { message: string } {
 
 export function openidStrategy<TUser>(
 	options: OpenIDStrategyOptions,
-	validate: (
-		ctx: Context,
-		identifier: string,
-	) => Awaitable<TUser | undefined>,
+	validate: (ctx: Context, identifier: string) => Awaitable<TUser | undefined>
 ): HonoPassportStrategy<TUser> {
 	const extensions: { requestParams: Record<string, string> }[] = [];
 
 	const relyingParty = new RelyingParty(
 		options.returnURL,
 		options.realm,
-		(options.stateless === undefined) ? false : options.stateless,
-		(options.strict === undefined) ? true : options.strict,
+		options.stateless === undefined ? false : options.stateless,
+		options.strict === undefined ? true : options.strict,
 		extensions
 	);
 
@@ -91,7 +94,7 @@ export function openidStrategy<TUser>(
 				result = await verifyAssertion(ctx.req.raw.url);
 			} catch (e) {
 				if (isOpenIDError(e)) {
-					throw new PassportError(`Verify assertion failed: ${e.message}`)
+					throw new PassportError(`Verify assertion failed: ${e.message}`);
 				}
 				throw e;
 			}
@@ -115,4 +118,3 @@ export function openidStrategy<TUser>(
 		},
 	};
 }
-
