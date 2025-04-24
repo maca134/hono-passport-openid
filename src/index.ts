@@ -14,7 +14,7 @@ export type OpenIDStrategyOptions = {
 	identifierField?: string;
 };
 
-export class PassportStrategyOpenIDError extends PassportError { }
+export class OpenIDStrategyError extends PassportError { }
 
 async function getIdentifier(
 	ctx: Context,
@@ -51,7 +51,7 @@ async function getIdentifier(
 	}
 
 	if (!identifier) {
-		throw new PassportStrategyOpenIDError('No identifier found');
+		throw new OpenIDStrategyError('No identifier found');
 	}
 	return identifier;
 }
@@ -86,7 +86,7 @@ export function openidStrategy<TUser>(
 				const identifier = await getIdentifier(ctx, identifierField, options);
 				const url = await authenticate(identifier, false);
 				if (!url) {
-					throw new PassportStrategyOpenIDError('Failed to generate authentication URL');
+					throw new OpenIDStrategyError('Failed to generate authentication URL');
 				}
 				return ctx.redirect(url);
 			}
@@ -96,21 +96,21 @@ export function openidStrategy<TUser>(
 				result = await verifyAssertion(ctx.req.raw.url);
 			} catch (e) {
 				if (isOpenIDError(e)) {
-					throw new PassportStrategyOpenIDError(`Verify assertion failed: ${e.message}`);
+					throw new OpenIDStrategyError(`Verify assertion failed: ${e.message}`);
 				}
 				throw e;
 			}
 
 			if (!result) {
-				throw new PassportStrategyOpenIDError('Invalid assertion');
+				throw new OpenIDStrategyError('Invalid assertion');
 			}
 
 			if (!result.authenticated) {
-				throw new PassportStrategyOpenIDError('Failed to authenticate');
+				throw new OpenIDStrategyError('Failed to authenticate');
 			}
 
 			if (!result.claimedIdentifier) {
-				throw new PassportStrategyOpenIDError('No claimed identifier');
+				throw new OpenIDStrategyError('No claimed identifier');
 			}
 
 			const user = await validate(ctx, result.claimedIdentifier);
